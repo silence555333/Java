@@ -1,6 +1,5 @@
 package com.learn.annotation;
 
-import annotation.InitMethod;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
