@@ -1,0 +1,25 @@
+泛型
+
+integer 是number的子类，但是genericClass<Integer>不是GenericClass<number>的子类，这里有一个术语叫invariant
+
+可以使用通配符 ？
+public static void process(GenericClass<?> obj)
+{}
+
+传入指定类型
+
+public static void process(GenericClass<? extends Number> obj){}
+
+关于Covariant (协变)
+
+泛型数组
+
+在java里面，不让定义类似这样的泛型数组new List<String>[10]
+
+原因是：
+协变：意味着你能把某个子类型的数组赋值给它的父类型的数组，如 Object objectArray[] =new Integer[10]//正常工作
+
+非协变：意味着你不能把某个子类型数组赋值给它的父类型的数组，因为对泛型来讲，任何两个不同的类型之间既不是子类型的关系也不是父类型的关系
+如List<Object> objectList=new ArrayList<Integer> //编译出错
+
+因为上述基础原因，数组和泛型不能很好的协同工作
