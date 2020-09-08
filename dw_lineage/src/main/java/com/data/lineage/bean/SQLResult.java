@@ -29,4 +29,5 @@ public class SQLResult {
     public void setColLineList(List<ColLine> colLineList) {
         this.colLineList = colLineList;
     }
+
 }

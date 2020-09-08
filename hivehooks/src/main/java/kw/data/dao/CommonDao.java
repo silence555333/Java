@@ -12,4 +12,5 @@ public interface CommonDao {
 
     public void update(HiveLineage hl) throws SQLException;
 
+
 }

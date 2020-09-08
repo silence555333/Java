@@ -26,9 +26,10 @@ public class DBUtil {
 //        this.user = PropertyFileUtil.getProperty(type.name().toLowerCase() + ".jdbc.username");
 //        this.password = PropertyFileUtil.getProperty(type.name().toLowerCase() + ".jdbc.password");
         this.driver="com.mysql.jdbc.Driver";
-        this.url="jdbc:mysql://localhost:3306/hive";
-        this.user="root";
-        this.password="123456";
+        this.url="jdbc:mysql://192.168.100.201:3306/hive";
+        this.user="hive";
+        this.password="hive";
+
     }
     private void setConn() {
         try {

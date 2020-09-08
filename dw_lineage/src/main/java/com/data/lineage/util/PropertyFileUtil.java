@@ -31,11 +31,11 @@ public class PropertyFileUtil {
 //        }
 //
 //        //2读取jar内资源，运行使用
-//        InputStream is = PropertyFileUtil.class.getClass().getResourceAsStream("/app.properties");
-//        if (null != is) {
-//            loadProperty(is);
-//            return;
-//        }
+        InputStream is = PropertyFileUtil.class.getClass().getResourceAsStream("/app.properties");
+        if (null != is) {
+            loadProperty(is);
+            return;
+        }
 
         //1调试使用
         String debugFile = "src/main/resources/app.properties";

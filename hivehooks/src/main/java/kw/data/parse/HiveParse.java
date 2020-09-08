@@ -319,7 +319,7 @@ public class HiveParse {
         String sql21 = "alter table mp add partition (b='1', c='1')";
         String sql22 = "select login.uid from login day_login left outer join (select uid from regusers where dt='20130101') day_regusers on day_login.uid=day_regusers.uid where day_login.dt='20130101' and day_regusers.uid is null";
         String sql23 = "select name from (select * from zpc left outer join def) d";
-        String parsesql = sql23;
+        String parsesql = sql5;
         HiveParse hp = new HiveParse();
         System.out.println(parsesql);
         ASTNode ast = pd.parse(parsesql);

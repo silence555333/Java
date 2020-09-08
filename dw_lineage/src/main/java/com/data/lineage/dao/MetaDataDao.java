@@ -18,11 +18,23 @@ public class MetaDataDao {
     DBUtil dbUtil = new DBUtil(DBUtil.DB_TYPE.META);
 
     public List<ColumnNode> getColumn(String db, String table){
-        String sqlWhere  = "is_effective=1 and data_name='" + table + "'" + (Check.isEmpty(db) ? " " : (" and datastorage_name='"+db+"'"));
+//        String sqlWhere  = "is_effective=1 and data_name='" + table + "'" + (Check.isEmpty(db) ? " " : (" and datastorage_name='"+db+"'"));
         List<ColumnNode> colList = new ArrayList<ColumnNode>();
-        String sql = "SELECT rc.column_id,rc.column_name,rd.data_id,rd.data_name,rd.datastorage_name FROM r_data_column rc join " +
-                "(SELECT data_id,data_name,datastorage_name from r_data where " + sqlWhere + ") rd " +
-                "on rc.data_id=rd.data_id ORDER BY rc.column_position";
+        String sql="select b.DB_ID,b.`NAME` as datastorage_name " +
+                ",a.tbl_id as data_id," +
+                "a.TBL_NAME as data_name," +
+                "d.CD_ID as column_id ," +
+                "d.COLUMN_NAME as column_name \n" +
+                "from TBLS a join DBS b\n" +
+                "on a.DB_ID =b.DB_ID\n" +
+                "join SDS c\n" +
+                "on a.SD_ID = c.SD_ID\n" +
+                "join COLUMNS_V2 d\n" +
+                "on c.CD_ID=d.CD_ID " +
+                "where b.`name`= '"+db+"'  and a.TBL_NAME  ='" +table+"'";
+//        String sql = "SELECT rc.column_id,rc.column_name,rd.data_id,rd.data_name,rd.datastorage_name FROM r_data_column rc join " +
+//                "(SELECT data_id,data_name,datastorage_name from r_data where " + sqlWhere + ") rd " +
+//                "on rc.data_id=rd.data_id ORDER BY rc.column_position";
 
         try {
             List<Map<String, Object>> rs = dbUtil.doSelect(sql);
@@ -38,14 +50,21 @@ public class MetaDataDao {
             return colList;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new DBException(sqlWhere, e);
+            throw new DBException(sql, e);
         }
     }
 
     public List<TableNode> getTable(String db, String table){
-        String sqlWhere  = "is_effective=1 and data_name='" + table + "'" + (Check.isEmpty(db) ? " " : (" and datastorage_name='"+db+"'"));
+//        String sqlWhere  = "is_effective=1 and data_name='" + table + "'" + (Check.isEmpty(db) ? " " : (" and datastorage_name='"+db+"'"));
         List<TableNode> list = new ArrayList<TableNode>();
-        String sql = "SELECT data_id,data_name,datastorage_name from r_data where " + sqlWhere + "";
+
+        String sql="select b.DB_ID,b.`NAME` as datastorage_name " +
+                ",a.tbl_id as data_id," +
+                "a.TBL_NAME as data_name"+
+                "from tbls a join dbs b\n" +
+                "on a.DB_ID =b.DB_ID\n" +
+                "where b.name= '"+db+"'  and a.tab_name ='" +table+"'";
+//        String sql = "SELECT data_id,data_name,datastorage_name from r_data where " + sqlWhere + "";
         try {
             List<Map<String, Object>> rs = dbUtil.doSelect(sql);
             for (Map<String, Object> map : rs) {
@@ -58,7 +77,7 @@ public class MetaDataDao {
             return list;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new DBException(sqlWhere, e);
+            throw new DBException(sql, e);
         }
     }
 

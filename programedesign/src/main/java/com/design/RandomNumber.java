@@ -38,4 +38,9 @@ public class RandomNumber {
         System.out.println("输出计算的时间"+(enttime-starttime));
 
     }
+    /**
+     * 问题：如何生成0至n-1之间k个不同的随机顺序的随机整数
+     */
+
+
 }

@@ -655,7 +655,7 @@ public class LineParser {
             }
             ASTNode ast = pd.parse(sql);
             if ("local".equals(PropertyFileUtil.getProperty("environment"))) {
-                System.out.println(ast.toStringTree());
+                System.out.println(" get the ASTNode"+ast.toStringTree());
             }
             prepareParse();
             parseAST(ast);

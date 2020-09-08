@@ -13,4 +13,6 @@ public class HiveHooksExample implements ExecuteWithHookContext {
         System.out.println(" this is a simple hive hook test ");
 
     }
+
+
 }

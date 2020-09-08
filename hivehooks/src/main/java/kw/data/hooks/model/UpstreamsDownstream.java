@@ -51,9 +51,9 @@ public class UpstreamsDownstream {
 
     @Override
     public String toString() {
-        return "UpstreamsDownstream{" +
-                "upstreams=" + upstreams +
-                ", downstream=" + downstream +
+        return "{" +
+                "\"upstreams\":\"" + upstreams + '\"'+
+                ", \"downstream\":\"" + downstream +'\"'+
                 '}';
     }
 }

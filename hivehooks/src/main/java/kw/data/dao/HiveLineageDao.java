@@ -23,12 +23,12 @@ public class HiveLineageDao implements CommonDao {
 
         PreparedStatement ptmt = conn.prepareStatement(sql);
 
-        ptmt.setString(1, hl.getDb());
-        ptmt.setString(2, hl.getTname());
-        ptmt.setString(3, hl.getCol());
-        ptmt.setString(4, hl.getParent_db());
-        ptmt.setString(5, hl.getParent_tname());
-        ptmt.setString(6, hl.getParent_col());
+        ptmt.setString(1, hl.getTarget_db());
+        ptmt.setString(2, hl.getTarget_tname());
+        ptmt.setString(3, hl.getTarget_col());
+        ptmt.setString(4, hl.getSource_db());
+        ptmt.setString(5, hl.getSource_tname());
+        ptmt.setString(6, hl.getSource_col());
         ptmt.setString(7, hl.getPtype());
         ptmt.setString(8, hl.getExpr());
         ptmt.setTimestamp(9, new Timestamp(System.currentTimeMillis()));

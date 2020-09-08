@@ -8,63 +8,65 @@ import java.sql.Timestamp;
  * hive 的血缘依赖存储实体类
  */
 public class HiveLineage {
-   private String db ;
-   private String  tname ;
-   private String  col ;
-   private String  parent_db ;
-   private String  parent_tname;
-   private String parent_col ;
+   private String target_db ;
+   private String  target_tname ;
+   private String  target_col ;
+   private String  source_db ;
+   private String  source_tname;
+   private String source_col ;
    private String ptype ;
    private String  expr;
-   private Timestamp create_time;
-   private Timestamp update_time ;
+   private String query_id;
+   private String query_sql;
+   private String create_time;
+   private String update_time ;
 
-    public String getDb() {
-        return db;
+    public String getTarget_db() {
+        return target_db;
     }
 
-    public void setDb(String db) {
-        this.db = db;
+    public void setTarget_db(String target_db) {
+        this.target_db = target_db;
     }
 
-    public String getTname() {
-        return tname;
+    public String getTarget_tname() {
+        return target_tname;
     }
 
-    public void setTname(String tname) {
-        this.tname = tname;
+    public void setTarget_tname(String target_tname) {
+        this.target_tname = target_tname;
     }
 
-    public String getCol() {
-        return col;
+    public String getTarget_col() {
+        return target_col;
     }
 
-    public void setCol(String col) {
-        this.col = col;
+    public void setTarget_col(String target_col) {
+        this.target_col = target_col;
     }
 
-    public String getParent_db() {
-        return parent_db;
+    public String getSource_db() {
+        return source_db;
     }
 
-    public void setParent_db(String parent_db) {
-        this.parent_db = parent_db;
+    public void setSource_db(String source_db) {
+        this.source_db = source_db;
     }
 
-    public String getParent_tname() {
-        return parent_tname;
+    public String getSource_tname() {
+        return source_tname;
     }
 
-    public void setParent_tname(String parent_tname) {
-        this.parent_tname = parent_tname;
+    public void setSource_tname(String source_tname) {
+        this.source_tname = source_tname;
     }
 
-    public String getParent_col() {
-        return parent_col;
+    public String getSource_col() {
+        return source_col;
     }
 
-    public void setParent_col(String parent_col) {
-        this.parent_col = parent_col;
+    public void setSource_col(String source_col) {
+        this.source_col = source_col;
     }
 
     public String getPtype() {
@@ -83,35 +85,53 @@ public class HiveLineage {
         this.expr = expr;
     }
 
-    public Timestamp getCreate_time() {
+    public String getQuery_id() {
+        return query_id;
+    }
+
+    public void setQuery_id(String query_id) {
+        this.query_id = query_id;
+    }
+
+    public String getQuery_sql() {
+        return query_sql;
+    }
+
+    public void setQuery_sql(String query_sql) {
+        this.query_sql = query_sql;
+    }
+
+    public String getCreate_time() {
         return create_time;
     }
 
-    public void setCreate_time(Timestamp create_time) {
+    public void setCreate_time(String create_time) {
         this.create_time = create_time;
     }
 
-    public Timestamp getUpdate_time() {
+    public String getUpdate_time() {
         return update_time;
     }
 
-    public void setUpdate_time(Timestamp update_time) {
+    public void setUpdate_time(String update_time) {
         this.update_time = update_time;
     }
 
     @Override
     public String toString() {
         return "HiveLineage{" +
-                "db='" + db + '\'' +
-                ", tname='" + tname + '\'' +
-                ", col='" + col + '\'' +
-                ", parent_db='" + parent_db + '\'' +
-                ", parent_tname='" + parent_tname + '\'' +
-                ", parent_col='" + parent_col + '\'' +
+                "target_db='" + target_db + '\'' +
+                ", target_tname='" + target_tname + '\'' +
+                ", target_col='" + target_col + '\'' +
+                ", source_db='" + source_db + '\'' +
+                ", source_tname='" + source_tname + '\'' +
+                ", source_col='" + source_col + '\'' +
                 ", ptype='" + ptype + '\'' +
                 ", expr='" + expr + '\'' +
-                ", create_time=" + create_time +
-                ", update_time=" + update_time +
+                ", query_id='" + query_id + '\'' +
+                ", query_sql='" + query_sql + '\'' +
+                ", create_time='" + create_time + '\'' +
+                ", update_time='" + update_time + '\'' +
                 '}';
     }
 }

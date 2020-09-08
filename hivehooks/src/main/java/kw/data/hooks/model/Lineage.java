@@ -1,5 +1,7 @@
 package kw.data.hooks.model;
 
+import com.alibaba.fastjson.JSONArray;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -84,12 +86,12 @@ public class Lineage {
 
     @Override
     public String toString() {
-        return "Lineage{" +
-                "queryId='" + queryId + '\'' +
-                ", queryString='" + queryString + '\'' +
-                ", sourceTables=" + sourceTables +
-                ", targetTables=" + targetTables +
-                ", dependencies=" + dependencies +
+        return "{" +
+                "\"queryId\":\"" + queryId + '\"' +
+                ", \"queryString\":\"" + queryString + '\"' +
+                ", \"sourceTables\":\"" + sourceTables +'\"' +
+                ", \"targetTables\":\"" + targetTables +'\"'+
+                ", \"dependencies\":\"" + dependencies +'\"'+
                 '}';
     }
 }
