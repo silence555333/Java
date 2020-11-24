@@ -1,0 +1,33 @@
+server:
+  port: 8989
+spring:
+  datasource:
+    master:
+      password: know@321
+      url: jdbc:mysql://192.168.200.116:3306/linkis?useUnicode=true&characterEncoding=UTF-8
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      username: root
+      type: com.zaxxer.hikari.HikariDataSource
+    cluster:
+    - key: slave1
+      password: kcredit
+      url: jdbc:mysql://192.168.100.101:3306/k_credit?useUnicode=true&characterEncoding=UTF-8
+      idle-timeout: 20000
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      username: kcredit
+      type: com.zaxxer.hikari.HikariDataSource
+    - key: slave2
+      password: know@321
+      url: jdbc:mysql://192.168.200.116:3306/linkis?useUnicode=true&characterEncoding=UTF-8
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      username: root
+mybatis:
+  mapper-locations: classpath:/mybatis/mapper/*.xml
+  config-location:  classpath:/mybatis/config/mybatis-config.xml
+
+logging:
+  level:
+    com:
+      yukong:
+        chapter5:
+          repository: debug

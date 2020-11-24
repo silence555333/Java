@@ -292,7 +292,7 @@ public class HiveParse {
     }
     public static void main(String[] args) throws IOException, ParseException,
             SemanticException {
-        ParseDriver pd = new ParseDriver();
+
         // HiveConf conf = new HiveConf();
         String sql1 = "Select * from zpc1";
         String sql2 = "Select name,ip from zpc2 bieming where age > 10 and area in (select area from city)";
@@ -319,9 +319,49 @@ public class HiveParse {
         String sql21 = "alter table mp add partition (b='1', c='1')";
         String sql22 = "select login.uid from login day_login left outer join (select uid from regusers where dt='20130101') day_regusers on day_login.uid=day_regusers.uid where day_login.dt='20130101' and day_regusers.uid is null";
         String sql23 = "select name from (select * from zpc left outer join def) d";
-        String parsesql = sql5;
+        String sql24="with aa as (select name,id from test_yf.name ) insert into test_yf.test select a.id,b.name from test_yf.name a left join aa on a.id=aa.id";
+        String sql25="insert into dm_credit.dm_credit_news_h20_zp partition(`updated`)\n" +
+                "select\n" +
+                "    current_date as data_date\n" +
+                "    ,md5(concat_ws(tc.entid,nw.CRNW0001_003,cast(nw.CRNW0003_001 as string),nw.CRNW0001_002,(case when nw.CRNW0001_010 is null then nw.CRNW0001_017 else nw.CRNW0001_010 end) )) as id\n" +
+                "    ,tc.entid as entid\n" +
+                "    ,nw.CRNW0003_001 as crnw0003_001 --新闻指标代码\n" +
+                "    , (case when nw.CRNW0003_001 ='8409' then '战略合作'\n" +
+                "           when nw.CRNW0003_001 ='8414' then '股权质押'\n" +
+                "           when nw.CRNW0003_001 ='8427' then '股份回购'\n" +
+                "           when nw.CRNW0003_001 ='8410' then '重大合同'\n" +
+                "           when nw.CRNW0003_001 ='8411' then '重大交易'\n" +
+                "           when nw.CRNW0003_001 ='8413' then '兼并收购'\n" +
+                "           when nw.CRNW0003_001 ='8435' then '招投标'\n" +
+                "           when nw.CRNW0003_001 ='8441' then '公司项目'\n" +
+                "           end ) as crnw0003_001_name --新闻类别\n" +
+                "    ,nw.CRNW0001_003  as crnw0001_003  --新闻标题\n" +
+                "    ,cast(to_date(substr(nw.CRNW0001_002,0,10)) as  string)  as crnw0001_002 --新闻时间\n" +
+                "    ,(case when nw.CRNW0001_010 is null then nw.CRNW0001_017 else nw.CRNW0001_010 end) as links --新闻链接\n" +
+                "    ,`updated` as updated\n" +
+                "from\n" +
+                "    (select cast(current_date as string) as `updated`,entid,entname from dm_credit.dm_credit_compdup_f60_cr_view) tc\n" +
+                "left join\n" +
+                "   (\n" +
+                "   select\n" +
+                "       t3.entid\n" +
+                "       ,t1.CRNW0001_003\n" +
+                "       ,t1.CRNW0001_010\n" +
+                "       ,t1.CRNW0001_017\n" +
+                "       ,t3.CRNW0003_001\n" +
+                "       ,t1.CRNW0001_002\n" +
+                "   from\n" +
+                "       dwt_mart.dwt_list_news_primary_table_e60_cr t1 -- 新闻主表\n" +
+                "   left join\n" +
+                "       dwt_mart.dwt_list_news_organization_e60_cr t3 -- 新闻机构表\n" +
+                "   on t3.newscode = t1.newscode\n" +
+                "   where t3.CRNW0003_001 in ('8409' ,'8414' ,'8427' ,'8410' ,'8411' ,'8413' ,'8435' ,'8441' )\n" +
+                "   ) nw\n" +
+                "on tc.entid = nw.entid";
+        String parsesql = sql25;
         HiveParse hp = new HiveParse();
         System.out.println(parsesql);
+        ParseDriver pd = new ParseDriver();
         ASTNode ast = pd.parse(parsesql);
         System.out.println(ast.toStringTree());
         hp.parse(ast);

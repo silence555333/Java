@@ -20,6 +20,7 @@ public class HiveLineage  implements ExecuteWithHookContext {
         PropertyFileUtil.init(); //设置环境变量
         parse = new LineParser();
     }
+
     @Override
     public void run(HookContext hookContext) throws Exception {
         final HookContext.HookType  hookType=hookContext.getHookType();

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kw.kd.dss.repository.UserMapper">
+
+    <resultMap id="SysUserResultMap" type="User">
+        <id property="id" column="id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="username" column="USERNAME" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="password" column="PASSWORD" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="email" column="EMAIL" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="mobile" column="MOBILE" javaType="java.lang.String" jdbcType="VARCHAR"/>
+    </resultMap>
+    <delete id="deleteById">
+        delete from user where id=#{id}
+    </delete>
+
+    <select id="selectAll"  resultMap="SysUserResultMap">
+        select * from user
+    </select>
+
+
+    <insert id="save" parameterType="User" >
+        insert into user
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="username != null" >
+                username,
+            </if>
+            <if test="password != null" >
+                password,
+            </if>
+
+            <if test="email != null" >
+                email,
+            </if>
+            <if test="mobile != null" >
+                mobile,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="username != null" >
+                #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null" >
+                #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="email != null" >
+                #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="mobile != null" >
+                #{mobile,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="update" parameterType="User" >
+        update user
+        <set >
+            <if test="username != null" >
+                username = #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null" >
+                password = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="email != null" >
+                sex = #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="mobile != null" >
+                sex = #{mobile,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+
+
+    <select id="selectById" resultMap="SysUserResultMap">
+        select
+        *
+        from user
+        where id = #{id,jdbcType=VARCHAR}
+    </select>
+</mapper>
