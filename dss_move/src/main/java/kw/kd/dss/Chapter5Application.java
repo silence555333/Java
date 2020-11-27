@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Import(DynamicDataSourceRegister.class)
-@MapperScan("kw.kd.dss.repository")
+@MapperScan("kw.kd.dss.dao")
 @SpringBootApplication
 @EnableTransactionManagement
 public class Chapter5Application {
@@ -21,6 +21,6 @@ public class Chapter5Application {
         return new DynamicDataSourceAnnotationAdvisor(new DynamicDataSourceAnnotationInterceptor());
     }
     public static void main(String[] args) {
-        SpringApplication.run(Chapter5Application.class, args);
+        SpringApplication.run(Chapter5Application.class,args);
     }
 }

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
  * @Date: 2018/8/17 08:55
  * @Description:
  */
-@Service
+//@Service
 public class UserService {
 
     @Autowired
@@ -31,6 +31,4 @@ public class UserService {
         System.out.println(userMapper.update(user1));
         throw new RuntimeException();
     }
-
-
 }

@@ -19,8 +19,8 @@ import java.util.List;
  * @Description TODO
  * @create 2020-11-24 11:55
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest
+//@RunWith(SpringRunner.class)
+//@SpringBootTest
 public class SpringbootMysqlApplicationTests {
 
     @Resource

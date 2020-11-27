@@ -11,6 +11,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
+        <gson.version>2.8.5</gson.version>
         <linkis.version>0.9.3</linkis.version>
     </properties>
     <parent>
@@ -46,6 +47,52 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!--<dependency>-->
+            <!--<groupId>com.webank.wedatasphere.dss</groupId>-->
+            <!--<artifactId>dss-server</artifactId>-->
+            <!--<version>0.7.0</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>com.webank.wedatasphere.dss</groupId>-->
+            <!--<artifactId>dss-common</artifactId>-->
+            <!--<version>0.7.0</version>-->
+        <!--</dependency>-->
+
+        <!--<dependency>-->
+            <!--<groupId>com.webank.wedatasphere.dss</groupId>-->
+            <!--<artifactId>dss-scheduler-appjoint-core</artifactId>-->
+            <!--<version>0.7.0</version>-->
+        <!--</dependency>-->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.11</version>
+        </dependency>
+
+        <!--&lt;!&ndash; https://mvnrepository.com/artifact/org.htrace/htrace-core &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>org.htrace</groupId>-->
+            <!--<artifactId>htrace-core</artifactId>-->
+            <!--<version>3.0.4</version>-->
+        <!--</dependency>-->
+        <dependency>
+            <groupId>org.apache.htrace</groupId>
+            <artifactId>htrace-core</artifactId>
+            <version>3.1.0-incubating</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.51</version>
+        </dependency>
+
     </dependencies>
 
     <build>

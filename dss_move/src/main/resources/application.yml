@@ -10,11 +10,11 @@ spring:
       type: com.zaxxer.hikari.HikariDataSource
     cluster:
     - key: slave1
-      password: kcredit
-      url: jdbc:mysql://192.168.100.101:3306/k_credit?useUnicode=true&characterEncoding=UTF-8
+      password: know@2018
+      url: jdbc:mysql://192.168.100.201:3306/linkis?useUnicode=true&characterEncoding=UTF-8
       idle-timeout: 20000
       driver-class-name: com.mysql.cj.jdbc.Driver
-      username: kcredit
+      username: root
       type: com.zaxxer.hikari.HikariDataSource
     - key: slave2
       password: know@321
@@ -25,6 +25,13 @@ mybatis:
   mapper-locations: classpath:/mybatis/mapper/*.xml
   config-location:  classpath:/mybatis/config/mybatis-config.xml
 
+#mybatis:
+#  mapper-locations: classpath:/mybatis/mapper/*.xml
+#  config-location:  classpath:/mybatis/config/mybatis-config.xml
+eureka:
+  instance:
+    hostname:
+    prefer-ip-address: true
 logging:
   level:
     com:
