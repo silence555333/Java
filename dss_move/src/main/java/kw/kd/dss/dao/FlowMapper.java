@@ -52,6 +52,7 @@ public interface FlowMapper {
 
     void updateFlowBaseInfo(DWSFlow dwsFlow) throws DuplicateKeyException;
 
+    @DataSource("slave1")
     List<Long> selectSubFlowIDByParentFlowID(Long parentFlowID);
 
     void deleteFlowVersions(@Param("flowID") Long flowID, @Param("projectVersionID") Long projectVersionID);
@@ -63,6 +64,7 @@ public interface FlowMapper {
     @DataSource
     Long selectParentFlowIDByFlowID(Long flowID);
 
+    @DataSource("slave1")
     List<DWSFlow> listFlowByProjectID(Long projectID);
 
     List<DWSFlowVersion> listVersionByFlowIDAndProjectVersionID(@Param("flowID") Long flowID, @Param("projectVersionID") Long projectVersionID);
@@ -71,6 +73,7 @@ public interface FlowMapper {
 
     @DataSource
     List<DWSFlowVersion> listLastFlowVersionsByProjectVersionID(@Param("projectVersionID") Long projectVersionId);
+
 
     List<DWSFlowVersion> listLatestRootFlowVersionByProjectVersionID(Long projectVersionID);
 

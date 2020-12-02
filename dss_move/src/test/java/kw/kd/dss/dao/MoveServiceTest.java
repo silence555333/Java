@@ -28,8 +28,12 @@ public class MoveServiceTest {
         DWSProjectVersion srcproject=new DWSProjectVersion();
         srcproject.setId(11l);
         DWSProjectVersion targetproject=new DWSProjectVersion();
-        moveService.copyEnvProject(1l,22l,"kd_test",1l);
+        moveService.copyEnvProject(1l,24l,"kd_move0",1l);
 //        moveService.copyPublishProjectVersionMax(1l,srcproject,targetproject,"hdfs",19l);
+        /**
+         * c6fd5254-e497-43c8-ac32-c5d0336ceb9e
+         * b1e43ab8-3dfa-4688-95e0-4f520e5273e7
+         */
     }
 
 

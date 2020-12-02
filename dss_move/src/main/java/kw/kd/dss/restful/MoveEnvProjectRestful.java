@@ -8,6 +8,8 @@ import kw.kd.dss.entity.BackMessage;
 
 import kw.kd.dss.entity.project.DWSProject;
 import kw.kd.dss.entity.project.DWSProjectVersion;
+import kw.kd.dss.exception.AppJointErrorException;
+import kw.kd.dss.exception.DSSErrorException;
 import kw.kd.dss.service.MoveService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,7 +37,7 @@ public class MoveEnvProjectRestful {
         return "this is a test ";
     }
     @RequestMapping(value="/publishEnvProject",method = RequestMethod.GET)
-    public String PublishProject(@RequestParam Map<String, Object> params) {
+    public String PublishProject(@RequestParam Map<String, Object> params) throws DSSErrorException, AppJointErrorException {
 
         Long projectId= Long.valueOf(params.get("projectId").toString());
         String projectVersion=params.get("projectVersion").toString();
@@ -50,7 +52,11 @@ public class MoveEnvProjectRestful {
         bm.setProjectID(projectId);
         bm.setProjectVersion(projectVersion);
         bm.setUserID(userId);
-        return String.format("开始用户%s下的项目 为 %s,版本为 %s的部署",username,name,version);
+        DWSProjectVersion srcproject=new DWSProjectVersion();
+        srcproject.setId(11l);
+        DWSProjectVersion targetproject=new DWSProjectVersion();
+        moveService.copyEnvProject(1l,projectId,name,1l);
+        return String.format("完成用户%s下的项目 为 %s,版本为 %s的部署",username,name,version);
     }
 
     @RequestMapping(value="/publishEnvProject/status",method = RequestMethod.GET)

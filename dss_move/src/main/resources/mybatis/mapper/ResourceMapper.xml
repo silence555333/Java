@@ -74,6 +74,11 @@
                     #{updator},#{enableFlag})
     </insert>
 
-
+<select id="getResourceListByProjectID" resultMap="Resource" parameterType="java.util.Map">
+    select *  from linkis_resources
+    <where>
+        enable_flag = 1
+    </where>
+</select>
 </mapper>
 

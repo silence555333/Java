@@ -33,6 +33,10 @@
         id,`project_version_id`,`create_time`,`creator_id`,`update_time`,`comment`,`state`,`version_path`,`expire_time`
     </sql>
 
+    <sql id="project_application">
+        project_id,`application_id`,`application_project_id`
+    </sql>
+
     <select id="selectProjectByID" resultType="kw.kd.dss.entity.project.DWSProject">
         SELECT
             p.*, MIN(ISNULL(pph.id)) AS 'is_not_publish'
@@ -174,4 +178,13 @@
         SELECT application_project_id  FROM dss_project_applications_project WHERE project_id = #{projectID} AND application_id = #{applicationID}
     </select>
 
+    <select id="selectAccessByProjectId" resultType="kw.kd.dss.entity.project.DWSProjectApplicationProject">
+        SELECT *  FROM dss_project_applications_project WHERE project_id = #{projectID}
+    </select>
+
+    <insert id="insertAccessProject" useGeneratedKeys="true" keyProperty="project_id" parameterType="kw.kd.dss.entity.project.DWSProjectApplicationProject">
+        INSERT INTO dss_project_applications_project (<include refid = "project_application" />)
+        VALUES
+        (#{projectID},#{applicationID},#{applicationProjectID})
+    </insert>
 </mapper>

@@ -51,4 +51,6 @@ public interface ResourceDao {
 
     @Select("select owner from `linkis_resources` where resource_id = #{resourceId} ")
     String getUserByResourceId(@Param("resourceId") String resourceId);
+
+    List<Resource> getResourceListByProjectID(Long projectID);
 }

@@ -2,9 +2,11 @@ package kw.kd.dss.service.impl;
 
 
 import kw.kd.dss.config.DSSServerConstant;
+import kw.kd.dss.config.EnvDSSServerConstant;
 import kw.kd.dss.dao.*;
 import kw.kd.dss.dao.bml.ResourceDao;
 import kw.kd.dss.dao.bml.VersionDao;
+import kw.kd.dss.dao.qualitis.QualitisMapper;
 import kw.kd.dss.entity.Application;
 import kw.kd.dss.entity.bml.Resource;
 import kw.kd.dss.entity.bml.ResourceVersion;
@@ -12,19 +14,27 @@ import kw.kd.dss.entity.flow.DWSFlow;
 import kw.kd.dss.entity.flow.DWSFlowTaxonomy;
 import kw.kd.dss.entity.flow.DWSFlowVersion;
 import kw.kd.dss.entity.project.DWSProject;
+import kw.kd.dss.entity.project.DWSProjectApplicationProject;
 import kw.kd.dss.entity.project.DWSProjectTaxonomyRelation;
 import kw.kd.dss.entity.project.DWSProjectVersion;
+import kw.kd.dss.entity.qualitis.DWSQualitisProject;
+import kw.kd.dss.entity.qualitis.DWSQualitisProjectUser;
 import kw.kd.dss.exception.AppJointErrorException;
 import kw.kd.dss.exception.DSSErrorException;
 import kw.kd.dss.service.MoveService;
+import kw.kd.dss.util.DistcpHdfsUtil;
+import kw.kd.dss.util.FlowParserUtil;
+import kw.kd.dss.util.ZookeeperClient;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.yarn.server.utils.Lock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,6 +70,8 @@ public class MoveServiceImpl implements MoveService {
     private VersionDao versionMapper;
     @Autowired
     private ApplicationMapper applicationMapper;
+    @Autowired
+    private QualitisMapper qualitisMapper;
 
 
     @Override
@@ -80,11 +92,12 @@ public class MoveServiceImpl implements MoveService {
         return versions;
     }
 
+//    @Transactional(rollbackFor = {DSSErrorException.class, InterruptedException.class})
     @Override
     public Long copyEnvProject(Long projectVersionID, Long projectID, String projectName, Long userId) throws DSSErrorException, AppJointErrorException {
         //根据userid查询userName
         String userName = dwsUserMapper.getuserName(userId);
-        System.out.println("获取username---" + userName);
+
         DWSProject project = projectMapper.selectProjectByID(projectID);
         if (StringUtils.isNotEmpty(projectName)) {
             project.setName(projectName);
@@ -92,28 +105,30 @@ public class MoveServiceImpl implements MoveService {
         DWSProjectTaxonomyRelation projectTaxonomyRelation = projectTaxonomyMapper.selectProjectTaxonomyRelationByTaxonomyIdOrProjectId(projectID);
         //添加至wtss的project数据库，获取projectID
         project.setUserName(userName);
-        //这一块为判断是否存在调度
-//        if(existSchesulis()){
-//            createSchedulerProject(project);
-//        }
-//        Map<Long,Long> appjointProjectIDAndAppID = createAppjointProject(project);
+        /**
+         * 这一块增加质量关联的校验
+         * 1 dss_project_applications_project
+         * 2 qualitis_project
+         * 3 qualitis_project_user
+         */
+        copyQualitis(projectID);
         Long userID = dwsUserMapper.getUserID(userName);
-        System.out.println("获取userid---" + userID);
+
         //添加至dws的project数据库，这里的projectID应该不需要自增
         //目前是相同数据库，需要自增id保持一致
         project.setUserID(userID);
         project.setCreateTime(new Date());
         //这里因为跨集群复制，不能使用自增，与测试的id
         project.setId(projectID);
-        System.out.println("---project" + project.toString());
         projectMapper.addProject(project);
-//        if(!appjointProjectIDAndAppID.isEmpty())projectMapper.addAccessProjectRelation(appjointProjectIDAndAppID,project.getId());
+
         projectTaxonomyMapper.addProjectTaxonomyRelation(project.getId(), projectTaxonomyRelation.getTaxonomyId(), userID);
         DWSProjectVersion maxVersion = projectMapper.selectLatestVersionByProjectID(projectID);
         copyPublishProjectVersionMax(maxVersion.getId(), maxVersion, maxVersion, userName, project.getId());
         return project.getId();
     }
 
+    @Transactional(rollbackFor = {DSSErrorException.class, InterruptedException.class})
     @Override
     public void copyPublishProjectVersionMax(Long projectVersionID, DWSProjectVersion srcVersion, DWSProjectVersion targetVersion, String userName, Long srcProjectID) throws DSSErrorException {
         String maxVersionNum = generateInitVersion(srcVersion.getVersion());
@@ -125,16 +140,15 @@ public class MoveServiceImpl implements MoveService {
             targetVersion.setVersion(DSSServerConstant.DWS_PROJECT_FIRST_VERSION);
         }
         Long userID = dwsUserMapper.getUserID(userName);
-        System.out.println("------------userId2" + userID);
         targetVersion.setUpdatorID(userID);
         targetVersion.setUpdateTime(new Date());
         List<DWSFlowVersion> flowVersions = flowMapper.listLastFlowVersionsByProjectVersionID(targetVersion.getId())
                 .stream().sorted((o1, o2) -> Integer.valueOf(o1.getFlowID().toString()) - Integer.valueOf(o2.getFlowID().toString()))
                 .collect(Collectors.toList());
-        System.out.println("-----targetVersion  1 " + targetVersion.toString());
+
         Long oldProjectVersionID = targetVersion.getId();
         targetVersion.setId(srcVersion.getId());
-        System.out.println("-----targetVersion  2 " + targetVersion.toString());
+
         projectMapper.addProjectVersion(targetVersion);
         if (targetVersion.getId() == null) {
             throw new DSSErrorException(90015, "复制工程版本失败");
@@ -195,17 +209,25 @@ public class MoveServiceImpl implements MoveService {
         //进行资源的上传和同步
         //判断是否存在
 
+        FlowParserUtil flowParserUtil = new FlowParserUtil();
+
         for (DWSFlowVersion fv : flowVersions) {
-            System.out.println("----fv--------------------"+fv.toString());
+
             String jsonPath = fv.getJsonPath();
             String version = fv.getVersion();
+            /**
+             * 补充： 解析json文件，并将解析到的resourceid 进行写入
+             * 1,获取最新的flowid 对应的resource_json
+             * 2,根据resource_json解析出相关的所有resourceid
+             * 3,写入resourceid对应的linkis_resource 和 linkis_resource_version
+             */
             //获取来源集群的resource
 //            int isFileExists = resourceMapper.checkExists(jsonPath);
 //            if (isFileExists == 0) return;
 
             Resource resource = resourceMapper.getResource(jsonPath);
             //插入一条记录到resource表
-            System.out.println("-----linkis——resource----"+resource.toString());
+            //一个flow 对应一个json
             long id = resourceMapper.uploadResource(resource);
             logger.info("{} uploaded a resource and resourceId is {}", resource.getResourceId());
             //插入一条记录到resource version表 暂时写定服务器为生产的ip
@@ -215,14 +237,22 @@ public class MoveServiceImpl implements MoveService {
             //读取linkis_resource_version 对应的版本信息
             String maxversion = versionMapper.getNewestVersion(resourceId);
 
+            // 1,获取最新的flowid 对应的resource_json
             ResourceVersion resourceVersion_src = versionMapper.getResourceVersion(resourceId, maxversion);
-
             ResourceVersion resourceVersion_target = ResourceVersion.createNewResourceVersion(resourceId, resourceVersion_src.getResource(), resourceVersion_src.getFileMd5(),
                     clientIp, resourceVersion_src.getSize(), "v000001", 1);
-            System.out.println("--------目标集群需要传送的资源11--------------"+resourceVersion_target.toString());
             versionMapper.insertNewVersion(resourceVersion_target);
-            System.out.println("--------目标集群需要传送的资源--------------"+resourceVersion_target.getResource());
 
+            // 2,解析json文件，获取依赖的resourceid
+            String json_path = resourceVersion_target.getResource();
+            String file_md5 = resourceVersion_src.getFileMd5();
+            String srcPath = json_path.replace("hdfs://", EnvDSSServerConstant.DSS_DEV_HDFS_URL);
+            distcpEnvDSSFile(json_path);
+            String local_tmp_file = EnvDSSServerConstant.DWS_HDFS_LOCAL_TMP_DIR + file_md5;
+            List<String> resourceid_list = flowParserUtil.getFlowResouceIdList(srcPath, local_tmp_file);
+            for (String resource_id : resourceid_list) {
+                getResouceAndCopy(resource_id);
+            }
         }
 
         if (flowVersions != null && flowVersions.size() > 0) {
@@ -232,21 +262,86 @@ public class MoveServiceImpl implements MoveService {
             });
             flowMapper.batchInsertFlowVersion(flowVersions);
         }
-        System.out.println(projectVersionID + "-----" + srcVersion.getId() + "----" + userName + "----" + srcProjectID);
-//        throw new RuntimeException();
     }
 
-//    private Map<Long,Long> createAppjointProject(DWSProject project) throws DSSErrorException, AppJointErrorException {
-//        Map applicationProjectIDs = new HashMap<Long,Long>();
-//        List<Pair<Project, String>> pairs = projectServiceAddFunction(project, ProjectService::createProject, applicationService.listAppjoint());
-//        for (Pair<Project, String> pair : pairs) {
-//            if(pair.getFirst().getId() != null){
-//                applicationProjectIDs.put(applicationService.getApplication(pair.getSecond()).getId(),pair.getFirst().getId());
-//            }
-//        }
-//        return applicationProjectIDs;
-//    }
+    @Override
+    public void delResourceProject(Long projectID) {
+        //1 删除linkis_resource 和 linkis_resource_version
 
+        Map<Long, Long> subAndParentFlowIDMap = new ConcurrentHashMap<>();
+
+
+
+
+
+
+    }
+
+    @Override
+    public void copyQualitis(Long projectID) {
+        /**
+         * 这一块增加质量关联的校验
+         * 1 dss_project_applications_project
+         * 2 qualitis_project
+         * 3 qualitis_project_user
+         */
+        DWSProjectApplicationProject dwsProjectApplicationProject=projectMapper.selectAccessByProjectId(projectID);
+        if (dwsProjectApplicationProject==null||dwsProjectApplicationProject.equals("")){
+            logger.info("获取到的相关数据为空");
+        }else {
+            projectMapper.insertAccessProject(dwsProjectApplicationProject);
+            Long relateId=dwsProjectApplicationProject.getApplicationProjectID();
+            DWSQualitisProject dwsQualitisProject=qualitisMapper.queryQualitiesProject(relateId);
+            if(dwsProjectApplicationProject.equals("")||dwsProjectApplicationProject==null){
+                logger.warn("质量检查中没有创建该项目");
+            }else {
+                qualitisMapper.insertQualitiesProject(dwsQualitisProject);
+                DWSQualitisProjectUser dwsQualitisProjectUser =qualitisMapper.queryQualitiesProjectUser(relateId);
+                if(dwsProjectApplicationProject.equals("")||dwsProjectApplicationProject==null){
+                    logger.warn("质量权限检查中没有创建该项目");
+                }else {
+                    qualitisMapper.insertQualitiesProjectUser(dwsQualitisProjectUser);
+                }
+            }
+        }
+    }
+
+
+    public void distcpEnvDSSFile(String json_path) {
+        DistcpHdfsUtil distcpHdfsUtil = new DistcpHdfsUtil();
+        String activenode = ZookeeperClient.getActiveNode();
+        String srcPath = json_path.replace("hdfs://", EnvDSSServerConstant.DSS_DEV_HDFS_URL);
+        String dstPath = json_path.replace("hdfs://", String.format(EnvDSSServerConstant.DWS_PRO_HDFS_URL_FORMAT, activenode));
+        logger.info(String.format("将测试环境的%s复制到生产集群%s", srcPath, dstPath));
+        distcpHdfsUtil.distCopy(new Path(srcPath), new Path(dstPath));
+
+    }
+
+    /**
+     * 根据resourceid 获取linkis_resource 和linkis_resource_version的最新版本并且进行同步
+     *
+     * @param resourceId
+     */
+    public void getResouceAndCopy(String resourceId) {
+
+        Resource resource = resourceMapper.getResource(resourceId);
+        //插入一条记录到resource表
+        //一个flow 对应一个json
+        long id = resourceMapper.uploadResource(resource);
+        logger.info("{} uploaded a resource and resourceId is {}", resource.getResourceId());
+        //获取version
+        String maxversion = versionMapper.getNewestVersion(resourceId);
+        String clientIp = "192.168.200.206";
+        // 1,获取最新的flowid 对应的resource_json
+        ResourceVersion resourceVersion_src = versionMapper.getResourceVersion(resourceId, maxversion);
+        ResourceVersion resourceVersion_target = ResourceVersion.createNewResourceVersion(resourceId, resourceVersion_src.getResource(), resourceVersion_src.getFileMd5(),
+                clientIp, resourceVersion_src.getSize(), "v000001", 1);
+        versionMapper.insertNewVersion(resourceVersion_target);
+        //复制文件
+        String json_path = resourceVersion_src.getResource();
+        distcpEnvDSSFile(json_path);
+
+    }
     /**
      * 统一初始化版本
      *
@@ -265,45 +360,5 @@ public class MoveServiceImpl implements MoveService {
     private Application getApplication(String appName) {
         return applicationMapper.getApplication(appName);
     }
-
-//    private void createSchedulerProject(DWSProject dwsProject) throws DSSErrorException {
-//        try {
-//            if(getSchedulerAppJoint() != null) {
-//                projectServiceAddFunction(dwsProject, ProjectService::createProject, Arrays.asList(getSchedulerAppJoint()));
-//            }else{
-//                logger.error("Add scheduler project failed for scheduler appjoint is null");
-//            }
-//        } catch (Exception e) {
-//            logger.error("add scheduler project failed,", e);
-//            throw new DSSErrorException(90002, "add scheduler project failed" + e.getMessage());
-//        }
-//    }
-//    public List<Pair<Project,String>> projectServiceAddFunction(DWSProject project, ProjectServiceAddFunction projectServiceAddFunction, List<AppJoint> appJoints) throws AppJointErrorException {
-//        ArrayList<Pair<Project,String>> projects = new ArrayList<>();
-//        for (AppJoint appJoint : appJoints) {
-//            Project appJointProject = null;
-//            Session session = null;
-//            if (appJoint.getSecurityService() != null) {
-//                logger.info("[addProject]securityService is exist,{}login...", project.getUserName());
-//                session = appJoint.getSecurityService().login(project.getUserName());
-//            }
-//            if (appJoint.getProjectService() != null) {
-//                logger.info("[addProject]projectService is exist");
-//                appJointProject = projectServiceAddFunction.accept(appJoint.getProjectService(), project, session);
-//                if(appJointProject != null) projects.add(new Pair<Project, String>(appJointProject,appJoint.getAppJointName()));
-//            }
-//        }
-//        return projects;
-//    }
-//    private SchedulerAppJoint getSchedulerAppJoint(){
-//        if(schedulerAppJoint == null){
-//            try {
-//                schedulerAppJoint = (SchedulerAppJoint)applicationService.getAppjoint("schedulis");
-//            } catch (AppJointErrorException e) {
-//                logger.error("Schedule system init failed!", e);
-//            }
-//        }
-//        return schedulerAppJoint;
-//    }
 
 }

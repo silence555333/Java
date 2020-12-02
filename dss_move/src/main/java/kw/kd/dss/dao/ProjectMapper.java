@@ -21,6 +21,7 @@ package kw.kd.dss.dao;
 
 import kw.kd.dss.annotation.DataSource;
 import kw.kd.dss.entity.project.DWSProject;
+import kw.kd.dss.entity.project.DWSProjectApplicationProject;
 import kw.kd.dss.entity.project.DWSProjectPublishHistory;
 import kw.kd.dss.entity.project.DWSProjectVersion;
 import org.apache.ibatis.annotations.Param;
@@ -68,5 +69,12 @@ public interface ProjectMapper {
     @DataSource("slave1")
     void addAccessProjectRelation(@Param("appjointProjectIDAndAppID") Map<Long, Long> appjointProjectIDAndAppID, @Param("projectID") Long projectID);
 
+
     Long getAppjointProjectID(@Param("projectID") Long projectID, @Param("applicationID") Integer applicationID);
+
+    @DataSource
+    DWSProjectApplicationProject selectAccessByProjectId(Long projectID);
+
+    @DataSource("slave1")
+    void insertAccessProject(DWSProjectApplicationProject dwsProjectApplicationProject);
 }

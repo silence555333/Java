@@ -1,15 +1,10 @@
 package kw.kd.dss.service;
 
-
-
-import kw.kd.dss.annotation.DataSource;
 import kw.kd.dss.entity.flow.DWSFlowVersion;
 import kw.kd.dss.entity.project.DWSProjectVersion;
 import kw.kd.dss.exception.AppJointErrorException;
 import kw.kd.dss.exception.DSSErrorException;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 
@@ -33,5 +28,8 @@ public interface MoveService {
 
     void copyPublishProjectVersionMax(Long projectVersionID, DWSProjectVersion srcVersion, DWSProjectVersion targetVersion, String userName, Long srcProjectID) throws DSSErrorException;
 
+    void delResourceProject(Long projectID);
+
+    void copyQualitis(Long projectID);
 
 }
