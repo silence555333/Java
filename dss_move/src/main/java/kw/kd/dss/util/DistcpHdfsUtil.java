@@ -1,9 +1,9 @@
 package kw.kd.dss.util;
 
 import kw.kd.dss.config.CommonConfigInfo;
-import kw.kd.dss.register.DynamicDataSourceRegister;
+
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
+
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.tools.DistCp;
@@ -11,8 +11,6 @@ import org.apache.hadoop.tools.DistCpOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URI;
 import java.security.PrivilegedExceptionAction;
 
 /**
@@ -21,6 +19,7 @@ import java.security.PrivilegedExceptionAction;
  * @Description TODO
  * @create 2020-11-30 16:51
  */
+
 public class DistcpHdfsUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(DistcpHdfsUtil.class);
@@ -38,13 +37,11 @@ public class DistcpHdfsUtil {
                               return null;
                           }
                       });
-
         } catch (Exception e) {
             logger.error("Couldn't execute distCp from {} to {}", sourceFile.toString(), destFile.toString());
             e.printStackTrace();
         }
     }
-
 }
 
 

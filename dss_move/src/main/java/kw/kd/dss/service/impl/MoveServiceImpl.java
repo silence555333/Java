@@ -27,7 +27,6 @@ import kw.kd.dss.util.FlowParserUtil;
 import kw.kd.dss.util.ZookeeperClient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.yarn.server.utils.Lock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +49,7 @@ import java.util.stream.Collectors;
 @Service
 public class MoveServiceImpl implements MoveService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
     private ProjectTaxonomyMapper projectTaxonomyMapper;
 
@@ -92,9 +92,11 @@ public class MoveServiceImpl implements MoveService {
         return versions;
     }
 
-//    @Transactional(rollbackFor = {DSSErrorException.class, InterruptedException.class})
+    @Transactional(rollbackFor = {DSSErrorException.class, InterruptedException.class})
     @Override
     public Long copyEnvProject(Long projectVersionID, Long projectID, String projectName, Long userId) throws DSSErrorException, AppJointErrorException {
+
+
         //根据userid查询userName
         String userName = dwsUserMapper.getuserName(userId);
 
@@ -125,6 +127,7 @@ public class MoveServiceImpl implements MoveService {
         projectTaxonomyMapper.addProjectTaxonomyRelation(project.getId(), projectTaxonomyRelation.getTaxonomyId(), userID);
         DWSProjectVersion maxVersion = projectMapper.selectLatestVersionByProjectID(projectID);
         copyPublishProjectVersionMax(maxVersion.getId(), maxVersion, maxVersion, userName, project.getId());
+
         return project.getId();
     }
 
@@ -266,17 +269,22 @@ public class MoveServiceImpl implements MoveService {
 
     @Override
     public void delResourceProject(Long projectID) {
-        //1 删除linkis_resource 和 linkis_resource_version
-
-        Map<Long, Long> subAndParentFlowIDMap = new ConcurrentHashMap<>();
-
-
-
-
-
-
+        // 从测试中读取所有的项目，删除多余文件
+        List<Resource> resourceslist=resourceMapper.selectLinkisResourcesList(projectID);
+        Integer size=resourceslist.size();
+        String[] idList=new String[size];
+        for (int i=0;i<size;i++){
+            idList[i]=resourceslist.get(i).getResourceId();
+            System.out.println("----输出数据"+resourceslist.get(i).getResourceId());
+        }
+        //删除已经存在的
+        batchDeleteLinkisResourcesAndVersion(idList);
     }
 
+    public void batchDeleteLinkisResourcesAndVersion(String[] resourceIdList){
+        resourceMapper.batchDeleteLinkisRsources(resourceIdList);
+        resourceMapper.batchDeleteLinkisRsourcesVersion(resourceIdList);
+    }
     @Override
     public void copyQualitis(Long projectID) {
         /**
@@ -285,21 +293,21 @@ public class MoveServiceImpl implements MoveService {
          * 2 qualitis_project
          * 3 qualitis_project_user
          */
-        DWSProjectApplicationProject dwsProjectApplicationProject=projectMapper.selectAccessByProjectId(projectID);
-        if (dwsProjectApplicationProject==null||dwsProjectApplicationProject.equals("")){
+        DWSProjectApplicationProject dwsProjectApplicationProject = projectMapper.selectAccessByProjectId(projectID);
+        if (dwsProjectApplicationProject == null || dwsProjectApplicationProject.equals("")) {
             logger.info("获取到的相关数据为空");
-        }else {
+        } else {
             projectMapper.insertAccessProject(dwsProjectApplicationProject);
-            Long relateId=dwsProjectApplicationProject.getApplicationProjectID();
-            DWSQualitisProject dwsQualitisProject=qualitisMapper.queryQualitiesProject(relateId);
-            if(dwsProjectApplicationProject.equals("")||dwsProjectApplicationProject==null){
+            Long relateId = dwsProjectApplicationProject.getApplicationProjectID();
+            DWSQualitisProject dwsQualitisProject = qualitisMapper.queryQualitiesProject(relateId);
+            if (dwsProjectApplicationProject.equals("") || dwsProjectApplicationProject == null) {
                 logger.warn("质量检查中没有创建该项目");
-            }else {
+            } else {
                 qualitisMapper.insertQualitiesProject(dwsQualitisProject);
-                DWSQualitisProjectUser dwsQualitisProjectUser =qualitisMapper.queryQualitiesProjectUser(relateId);
-                if(dwsProjectApplicationProject.equals("")||dwsProjectApplicationProject==null){
+                DWSQualitisProjectUser dwsQualitisProjectUser = qualitisMapper.queryQualitiesProjectUser(relateId);
+                if (dwsProjectApplicationProject.equals("") || dwsProjectApplicationProject == null) {
                     logger.warn("质量权限检查中没有创建该项目");
-                }else {
+                } else {
                     qualitisMapper.insertQualitiesProjectUser(dwsQualitisProjectUser);
                 }
             }
@@ -342,6 +350,7 @@ public class MoveServiceImpl implements MoveService {
         distcpEnvDSSFile(json_path);
 
     }
+
     /**
      * 统一初始化版本
      *

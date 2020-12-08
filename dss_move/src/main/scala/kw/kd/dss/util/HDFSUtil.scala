@@ -20,9 +20,9 @@ import org.apache.zookeeper.common.IOUtils
   * @createDate 2020/03/18 9:29 <br>
   */
 object HDFSUtil {
-  val activenode=ZookeeperClient.getActiveNode()
-//  val hdfsUrl = "hdfs://"+activenode+":8020"
-val hdfsUrl = "hdfs://m5.server:8020"
+//  val activenode=ZookeeperClient.getActiveNode()
+ //  val hdfsUrl = "hdfs://"+activenode+":8020"
+  val hdfsUrl = "hdfs://m5.server:8020"
   var realUrl = ""
 
   /**
@@ -249,44 +249,44 @@ val hdfsUrl = "hdfs://m5.server:8020"
     * @param content
     * @return
     */
-  def appendContent(hdfsFile:String,content:String):Boolean={
-    var result = false
-    if (StringUtils.isNoneBlank(hdfsFile) && null != content) {
-      realUrl = hdfsUrl + hdfsFile
-      val config = new Configuration()
-      config.set("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER")
-      config.set("dfs.client.block.write.replace-datanode-on-failure.enable", "true")
-      config.setBoolean("dfs.support.append", true)
-      val outputStream=getOutputStream(realUrl,config)
-      val inputStream=new ByteArrayInputStream(content.getBytes())
-      IOUtils.copyBytes(inputStream, outputStream, 4096, true)
-      outputStream.close()
-      inputStream.close()
+//  def appendContent(hdfsFile:String,content:String):Boolean={
+//    var result = false
+//    if (StringUtils.isNoneBlank(hdfsFile) && null != content) {
+//      realUrl = hdfsUrl + hdfsFile
+//      val config = new Configuration()
+//      config.set("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER")
+//      config.set("dfs.client.block.write.replace-datanode-on-failure.enable", "true")
+//      config.setBoolean("dfs.support.append", true)
+//      val outputStream=getOutputStream(realUrl,config)
+//      val inputStream=new ByteArrayInputStream(content.getBytes())
+//      IOUtils.copyBytes(inputStream, outputStream, 4096, true)
+//      outputStream.close()
+//      inputStream.close()
+//
+//    }
+//    result
+//  }
 
-    }
-    result
-  }
-
-  def getOutputStream(path: String, conf: Configuration): FSDataOutputStream = {
-    val dfsPath = new Path(path)
-    val dfs = getFileSystemForPath(dfsPath, conf)
-    // If the file exists and we have append support, append instead of creating a new file
-    val stream: FSDataOutputStream = {
-      if (dfs.isFile(dfsPath)) {
-        if (conf.getBoolean("dfs.support.append", true) ||
-          conf.getBoolean("hdfs.append.support", false) ||
-          dfs.isInstanceOf[RawLocalFileSystem]) {
-          dfs.append(dfsPath)
-        } else {
-          throw new IllegalStateException("File exists and there is no append support!")
-        }
-      } else {
-        // we dont' want to use hdfs erasure coding, as that lacks support for append and hflush
-        SparkHadoopUtil.createNonECFile(dfs, dfsPath)
-      }
-    }
-    stream
-  }
+//  def getOutputStream(path: String, conf: Configuration): FSDataOutputStream = {
+//    val dfsPath = new Path(path)
+//    val dfs = getFileSystemForPath(dfsPath, conf)
+//    // If the file exists and we have append support, append instead of creating a new file
+//    val stream: FSDataOutputStream = {
+//      if (dfs.isFile(dfsPath)) {
+//        if (conf.getBoolean("dfs.support.append", true) ||
+//          conf.getBoolean("hdfs.append.support", false) ||
+//          dfs.isInstanceOf[RawLocalFileSystem]) {
+//          dfs.append(dfsPath)
+//        } else {
+//          throw new IllegalStateException("File exists and there is no append support!")
+//        }
+//      } else {
+//        // we dont' want to use hdfs erasure coding, as that lacks support for append and hflush
+//        SparkHadoopUtil.createNonECFile(dfs, dfsPath)
+//      }
+//    }
+//    stream
+//  }
   def getFileSystemForPath(path: Path, conf: Configuration): FileSystem = {
     // For local file systems, return the raw local file system, such calls to flush()
     // actually flushes the stream.

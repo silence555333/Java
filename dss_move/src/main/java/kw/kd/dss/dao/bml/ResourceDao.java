@@ -52,5 +52,16 @@ public interface ResourceDao {
     @Select("select owner from `linkis_resources` where resource_id = #{resourceId} ")
     String getUserByResourceId(@Param("resourceId") String resourceId);
 
+    @DataSource
     List<Resource> getResourceListByProjectID(Long projectID);
+
+    @DataSource
+    List<Resource> selectLinkisResourcesList(Long projectID);
+
+    @DataSource("slave1")
+    void batchDeleteLinkisRsources(String[]  resourceID);
+
+    @DataSource("slave1")
+    void batchDeleteLinkisRsourcesVersion(String[]  resourceID);
+
 }

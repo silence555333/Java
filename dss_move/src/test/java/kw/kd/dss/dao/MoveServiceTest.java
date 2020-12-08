@@ -23,7 +23,7 @@ public class MoveServiceTest {
     @Autowired
     private MoveService moveService;
 
-    @Test
+//    @Test
     public void copyPublishProjectVersionMax() throws DSSErrorException, InterruptedException, AppJointErrorException {
         DWSProjectVersion srcproject=new DWSProjectVersion();
         srcproject.setId(11l);
@@ -34,6 +34,11 @@ public class MoveServiceTest {
          * c6fd5254-e497-43c8-ac32-c5d0336ceb9e
          * b1e43ab8-3dfa-4688-95e0-4f520e5273e7
          */
+    }
+
+    @Test
+    public void getLinkisResource(){
+        moveService.delResourceProject(24l);
     }
 
 

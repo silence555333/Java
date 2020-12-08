@@ -3,9 +3,12 @@ package kw.kd.dss.util;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import kw.kd.dss.config.EnvDSSServerConstant;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,11 +24,18 @@ import java.util.Set;
  */
 public class FlowParserUtil {
     private static final Logger logger = LoggerFactory.getLogger(FlowParserUtil.class);
+    private HdfsFileUtil hdfsFileUtil=new HdfsFileUtil();
 
     public List<String> getFlowResouceIdList(String jsonPath,String localFile){
 
+        //判断本地文件是否存在，存在先删除
+
         //先将hdfs上的json文件下载到本地
-        HDFSUtil.downloadHDFS2Localfile(jsonPath,localFile);
+        try {
+            hdfsFileUtil.download(new Configuration(), EnvDSSServerConstant.DSS_DEV_HDFS_URL,jsonPath,localFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         //解析本地json文件
         List<String> list_resource=parseJsonFile(localFile);
         //转换去重
