@@ -182,17 +182,18 @@ public class LineageLogger implements ExecuteWithHookContext {
 
                 // Log the lineage info
                 String lineage = out.toString();
+                LOG.info(lineage);
                 System.out.println("Test by silence -- " + lineage);
-//                if (testMode) {
-                    // Log to console
-                    log(lineage);
-//                } else {
-                    // In non-test mode, emit to a log file,
-                    // which can be different from the normal hive.log.
-                    // For example, using NoDeleteRollingFileAppender to
-                    // log to some file with different rolling policy.
-                    LOG.info(lineage);
-//                }
+////                if (testMode) {
+//                    // Log to console
+//                    log(lineage);
+////                } else {
+//                    // In non-test mode, emit to a log file,
+//                    // which can be different from the normal hive.log.
+//                    // For example, using NoDeleteRollingFileAppender to
+//                    // log to some file with different rolling policy.
+//                    LOG.info(lineage);
+////                }
             } catch (Throwable t) {
                 // Don't fail the query just because of any lineage issue.
                 log("Failed to log lineage graph, query is not affected\n"

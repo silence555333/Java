@@ -54,22 +54,24 @@ public class Search {
     }
 
     public static void main(String[] args) {
-        int[] t = new int[5];
-        t[0] = 1;
-        t[1] = 2;
-        t[2] = 3;
-        t[3] = 4;
-        t[4] = 6;
+        int[] t = new int[3];
+        t[0] = 3;
+        t[1] = 5;
+        t[2] = 1;
 
 //      int res= bSearch(t,t.length,2);
-        bSearchMain(t, t.length, 2);
+//        bSearchMain(t, t.length, 6);
+        int ss=reserversearch(t,3);
+        System.out.println(ss);
+
 
 //      System.out.println(res);
 
     }
 
     public static void bSearchMain(int[] a, int n, int value) {
-        bsearchIntenery(a, 0, n - 1, value);
+        int wz=bsearchInteneryFirst(a, 0, n - 1, value);
+        System.out.println(wz);
 
     }
 
@@ -85,5 +87,94 @@ public class Search {
         }
     }
 
+    /**
+     * 查找第一个值等于给定值的元素
+     */
+    private static int bsearchInteneryFirst(int[] a, int low, int hight, int value) {
+        if (low > hight) return -1;
+        int mid = low + ((hight - low) >> 1);
+        System.out.println("mid--"+mid);
+        if (a[mid] == value) {
+//            int res=getFirst(a,mid,value);
+            return bsearchIntenery(a, mid -1, mid, value);
+//            return res;
+        } else if (a[mid] < value) {
+            return bsearchIntenery(a, mid + 1, hight, value);
+        } else {
+            return bsearchIntenery(a, low, mid - 1, value);
+        }
+    }
 
+
+    /**
+     * 查找第一个值等于给定值的元素
+     */
+    private static void bsearchInteneryF(int[] a,int n,int value){
+        int low=0;
+        int hight=n-1;
+        int mid=(low+hight)/2;
+
+        if(a[mid]==value){
+            mid=mid-1;
+           System.out.println("");
+        }
+
+
+    }
+    private  static  int getFirst(int[] a, int mid, int value){
+        int low=mid-1;
+        if(a[low]==value){
+          return   getFirst(a,low,value);
+        }else{
+            return mid;
+        }
+    }
+
+    /**
+     * 反转字符串查找
+     * @return
+     */
+    private static  int reserversearch(int[] a,int targer){
+        /**
+         * 使用二分查找，寻找反转点
+         * a[mid-1]>a[mid]||a[mid+1]<a[mid] 为反转点
+         * 获取反转点，得到两个区间
+         * 判断目标是否在区间，然后再使用二分查找
+         */
+        int n=a.length-1;
+        if(n==0){
+            return -1;
+        }
+        if(n==1){
+            if(a[n]==targer){
+                return n;
+            }else {
+                return -1;
+            }
+        }
+        int l=0;
+        int r=n-1;
+        int mid=(l+r)/2;
+        while (l<r){
+            mid=(l+r)/2;
+            if(a[mid]==targer){
+                return mid;
+            }
+            if(a[0]<=a[mid]){
+                if(a[0]<=targer&&a[mid]<targer){
+                    r=mid-1;
+                }else{
+                    l=mid+1;
+                }
+            }else {
+
+                if (a[mid] < targer && a[n-1] <= targer) {
+                    l = mid + 1;
+                } else {
+                    r = mid - 1;
+                }
+            }
+        }
+        return mid;
+    }
 }

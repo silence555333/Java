@@ -192,4 +192,24 @@ public class TreeUtil {
     }
 
 
+    /**
+     * 二叉树的层序遍历
+     * @return
+     */
+    public List<List<Integer>> getLevelQuery(TreeNode root){
+
+        List<List<Integer>> res=new ArrayList<List<Integer>>();
+
+        if(root==null){
+            return  null;
+        }
+        //存放中间节点
+        List<Integer> tem=new ArrayList<Integer>();
+
+        if(root!=null){
+
+        }
+
+        return res;
+    }
 }
